@@ -1,6 +1,5 @@
+
 import axios from "axios";
-
-
 import {
   getAccessToken,
   getRefreshToken,
@@ -9,28 +8,24 @@ import {
 } from "../utils/token";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_URL || "/api",
 });
 
-api.interceptors.request.use(
-  (config) => {
-    const token = getAccessToken();
+api.interceptors.request.use((config) => {
+  const token = getAccessToken();
 
-    if (token) {
-      config.headers.Authorization =
-        `Bearer ${token}`;
-    }
-
-    return config;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => response,
 
   async (error) => {
-    const originalRequest =
-      error.config;
+    const originalRequest = error.config;
 
     if (
       error.response?.status === 401 &&
@@ -41,21 +36,17 @@ api.interceptors.response.use(
       try {
         const refreshToken = getRefreshToken();
 
-        const response =
-          await axios.post(
-            "http://localhost:5000/api/auth/refresh-token",
-            {
-              refreshToken,
-            }
-          );
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL || "/api"}/auth/refresh-token`,
+          {
+            refreshToken,
+          }
+        );
 
         const newAccessToken =
           response.data.data.accessToken;
 
-        setTokens(
-          newAccessToken,
-          refreshToken
-        );
+        setTokens(newAccessToken, refreshToken);
 
         originalRequest.headers.Authorization =
           `Bearer ${newAccessToken}`;
@@ -63,10 +54,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (err) {
         removeTokens();
-
-        window.location.href =
-          "/login";
-
+        window.location.href = "/login";
         return Promise.reject(err);
       }
     }
@@ -76,3 +64,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+
