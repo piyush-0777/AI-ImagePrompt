@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import ProfileHeader from "../../components/Profile/ProfileHeader";
-import ProfileTabs from "../../components/Profile/ProfileTabs";
+import ProfileHeader from "../../components/profile/ProfileHeader";
+import ProfileTabs from "../../components/profile/ProfileTabs";
 import PostGrid from "../../components/profile/PostGrid";
 import { getUserProfile } from '../../features/user/userThunks'
 import MainLayout from "../../layouts/MainLayout";
