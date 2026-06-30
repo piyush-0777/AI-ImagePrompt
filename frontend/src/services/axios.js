@@ -1,0 +1,78 @@
+import axios from "axios";
+
+
+import {
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+  removeTokens,
+} from "../utils/token";
+
+const api = axios.create({
+  baseURL: "http://localhost:5000/api",
+});
+
+api.interceptors.request.use(
+  (config) => {
+    const token = getAccessToken();
+
+    if (token) {
+      config.headers.Authorization =
+        `Bearer ${token}`;
+    }
+
+    return config;
+  }
+);
+
+api.interceptors.response.use(
+  (response) => response,
+
+  async (error) => {
+    const originalRequest =
+      error.config;
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = getRefreshToken();
+
+        const response =
+          await axios.post(
+            "http://localhost:5000/api/auth/refresh-token",
+            {
+              refreshToken,
+            }
+          );
+
+        const newAccessToken =
+          response.data.data.accessToken;
+
+        setTokens(
+          newAccessToken,
+          refreshToken
+        );
+
+        originalRequest.headers.Authorization =
+          `Bearer ${newAccessToken}`;
+
+        return api(originalRequest);
+      } catch (err) {
+        removeTokens();
+
+        window.location.href =
+          "/login";
+
+        return Promise.reject(err);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default api;
