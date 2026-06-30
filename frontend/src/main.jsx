@@ -12,7 +12,7 @@ import "./styles/globals.css";
 ReactDOM.createRoot(
   document.getElementById("root")
 ).render(
-  <React.StrictMode>
+  
     <Provider store={store}>
       <BrowserRouter>
         <Toaster
@@ -23,5 +23,5 @@ ReactDOM.createRoot(
         <App />
       </BrowserRouter>
     </Provider>
-  </React.StrictMode>
+  
 );
